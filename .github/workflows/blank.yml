@@ -1,0 +1,31 @@
+; get pointer to a view based on hwnd and create an application view
+$hWnd = WinGetHandle("[CLASS:Notepad]")
+$iHresult = $oApplicationViewCollection.GetViewForHwnd($hWnd, $pView)
+ConsoleWrite("View from handle = " & $pView & "/" & $iHresult & @CRLF)
+$oView = ObjCreateInterface($pView, $IID_IApplicationView, $tagIApplicationView)
+ConsoleWrite("Application view = " & IsObj($oView) & @CRLF)
+$iHresult = $oView.GetAppUserModelId($sView)
+ConsoleWrite("Get App ID = " & $sView & "/" & $iHresult & @CRLF)
+
+; verify if app is pinned with ptr and string
+$iHresult = $oVirtualDesktopPinnedApps.IsViewPinned($pView, $bValue)
+ConsoleWrite("Is View Pinned = " & $bValue & "/" & $iHresult & @CRLF)
+$iHresult = $oVirtualDesktopPinnedApps.IsAppIdPinned($sView, $bValue)
+ConsoleWrite("Is AppId Pinned = " & $bValue & "/" & $iHresult & @CRLF)
+
+; move application to a specific desktop
+$iHresult = $oVirtualDesktopManagerInternal.MoveViewToDesktop($pView, $pDesktop)
+ConsoleWrite("Move = " & $iHresult & @CRLF)
+
+Sleep(2000)
+
+; deletes an existing desktop
+$iHresult = $oVirtualDesktopManagerInternal.RemoveDesktop($pNew, $pDesktop)
+ConsoleWrite("Delete = " & $iHresult & @CRLF)
+
+Func __uuidof($sGUID)
+    Local $tGUID = DllStructCreate("ulong Data1;ushort Data2;ushort Data3;byte Data4[8]")
+    DllCall("ole32.dll", "long", "CLSIDFromString", "wstr", $sGUID, "struct*", $tGUID)
+    If @error Then Return SetError(@error, @extended, 0)
+    Return $tGUID
+EndFunc   ;==>__uuidof
